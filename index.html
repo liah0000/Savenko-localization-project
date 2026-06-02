@@ -165,9 +165,6 @@
         /* Left column */
         .col-left { display: flex; flex-direction: column; gap: 28px; }
 
-        /* Slogan */
-        .slogan-block { }
-
         /* ── BOTTOM SECTION ── */
         .bottom-section { margin-bottom: 32px; }
 
@@ -276,24 +273,6 @@
         /* Right column */
         .col-right { display: flex; flex-direction: column; gap: 24px; }
 
-        /* Rates */
-        .rates-block {
-            background: var(--emerald);
-            border-radius: 4px;
-            padding: 24px;
-        }
-
-        .rates-rubric {
-            font-size: 8px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: rgba(244,239,229,0.45);
-            margin-bottom: 16px;
-        }
-
-        .rate-item { margin-bottom: 14px; }
-        .rate-item:last-child { margin-bottom: 0; }
-
         .rate-top {
             display: flex;
             align-items: baseline;
@@ -323,15 +302,7 @@
             text-align: right;
         }
 
-        .rate-sep {
-            height: 1px;
-            background: rgba(244,239,229,0.1);
-            margin: 14px 0;
-        }
-
         /* Custom select */
-        .select-block { }
-
         .custom-select {
             position: relative;
             margin-top: 8px;
@@ -416,11 +387,6 @@
             background: currentColor;
             opacity: 0.4;
             flex-shrink: 0;
-        }
-
-        /* Hidden real select for form compat */
-        select.hidden-select {
-            display: none;
         }
 
         /* ── BUTTONS ── */
@@ -553,17 +519,17 @@
                 <div class="rates-two-col">
                     <div class="rate-item">
                         <div class="rate-top">
-                            <span class="rate-name">Стандарт</span>
+                            <span class="rate-name" id="rate_standard_label">Стандарт</span>
                             <span class="rate-price" id="rate_standard_price">0.05$</span>
                         </div>
-                        <div class="rate-unit">за слово</div>
+                        <div class="rate-unit" id="rate_unit_label">за слово</div>
                     </div>
                     <div class="rate-item">
                         <div class="rate-top">
-                            <span class="rate-name">Експерт</span>
+                            <span class="rate-name" id="rate_pro_label">Експерт</span>
                             <span class="rate-price" id="rate_pro_price">0.08$</span>
                         </div>
-                        <div class="rate-unit">за слово</div>
+                        <div class="rate-unit" id="rate_unit_label2">за слово</div>
                     </div>
                 </div>
             </div>
@@ -636,29 +602,33 @@
         try {
             const response = await fetch(lang + '.json');
             const data = await response.json();
+            
             Object.keys(data).forEach(key => {
                 const el = document.getElementById(key);
                 if (el && !el.classList.contains('select-option')) {
                     el.innerText = data[key];
                 }
             });
+
             // Update custom select options text
             if (data.pair_1) { const el = document.getElementById('pair_1'); if(el) el.childNodes[el.childNodes.length-1].textContent = data.pair_1; }
             if (data.pair_2) { const el = document.getElementById('pair_2'); if(el) el.childNodes[el.childNodes.length-1].textContent = data.pair_2; }
             if (data.pair_3) { const el = document.getElementById('pair_3'); if(el) el.childNodes[el.childNodes.length-1].textContent = data.pair_3; }
+            
             // Update displayed value
             const selected = document.querySelector('.select-option.selected');
             if (selected) document.getElementById('selectVal').textContent = selected.childNodes[selected.childNodes.length-1].textContent;
 
+            // Гнучкий парсинг цін (знаходить цифри та знак $ незалежно від його позиції)
             if (data.rate_standard) {
-                const m = data.rate_standard.match(/[\d.]+\$/);
+                const m = data.rate_standard.match(/\$?[\d.]+\$?/);
                 const el = document.getElementById('rate_standard_price');
-                if (el && m) el.innerText = m[0];
+                if (el && m) el.innerText = m[0].trim();
             }
             if (data.rate_pro) {
-                const m = data.rate_pro.match(/[\d.]+\$/);
+                const m = data.rate_pro.match(/\$?[\d.]+\$?/);
                 const el = document.getElementById('rate_pro_price');
-                if (el && m) el.innerText = m[0];
+                if (el && m) el.innerText = m[0].trim();
             }
         } catch (e) {
             console.error("Error loading lang file", e);
